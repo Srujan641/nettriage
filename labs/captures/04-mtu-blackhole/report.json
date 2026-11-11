@@ -1,0 +1,392 @@
+{
+  "id": "d5c6748daea3",
+  "target": {
+    "raw": "http://bigfile.lab/",
+    "host": "bigfile.lab",
+    "scheme": "http",
+    "port": 80,
+    "path": "/",
+    "is_ip": false,
+    "url": "http://bigfile.lab/"
+  },
+  "started_at": "2026-11-11T08:39:14+00:00",
+  "duration_ms": 15131,
+  "resolved_ip": "10.78.0.20",
+  "overall": "fail",
+  "headline": "DNS resolves fine, TCP 80 is open, but the HTTP response stalls because of a path-MTU black hole: only packets up to 1000 bytes cross the path, larger ones are dropped, and the ICMP 'fragmentation needed' message that should tell the sender to shrink them never arrives.",
+  "findings": [
+    {
+      "severity": "critical",
+      "code": "MTU_BLACKHOLE",
+      "layer": "network",
+      "message": "Path-MTU black hole: packets larger than 1000 bytes are silently dropped. Small exchanges (ping, TCP handshake, the request) work; the large HTTP response packets do not.",
+      "evidence": "DF ping of 972 bytes payload passes, one byte more is lost with no ICMP error",
+      "remedy": "Stop filtering ICMP type 3 code 4 on the path. Until then, clamp TCP MSS on the router (iptables -j TCPMSS --clamp-mss-to-pmtu) or lower the interface MTU on the endpoints."
+    }
+  ],
+  "checks": [
+    {
+      "id": "dns",
+      "title": "DNS lookup",
+      "status": "ok",
+      "summary": "bigfile.lab resolves to 10.78.0.20 in 0 ms using 10.77.0.53.",
+      "details": {
+        "resolver": "10.77.0.53",
+        "status": "NOERROR",
+        "a": [
+          "10.78.0.20"
+        ],
+        "aaaa": [],
+        "cname": [],
+        "ttl": 60,
+        "query_ms": 0,
+        "error_kind": null
+      },
+      "commands": [
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 bigfile.lab A",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 5733\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0\n\n;; ANSWER SECTION:\nbigfile.lab.\t\t60\tIN\tA\t10.78.0.20\n\n;; Query time: 0 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:39:14 UTC 2026\n;; MSG SIZE  rcvd: 45\n\n",
+          "duration_ms": 24,
+          "timed_out": false
+        },
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 bigfile.lab AAAA",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 28050\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n\n;; Query time: 0 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:39:14 UTC 2026\n;; MSG SIZE  rcvd: 29\n\n",
+          "duration_ms": 21,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 46
+    },
+    {
+      "id": "ping",
+      "title": "Ping (ICMP echo)",
+      "status": "ok",
+      "summary": "5/5 replies, avg 0.2 ms, jitter 0.1 ms.",
+      "details": {
+        "sent": 5,
+        "received": 5,
+        "loss_pct": 0.0,
+        "rtt": {
+          "min": 0.105,
+          "avg": 0.227,
+          "max": 0.44,
+          "jitter": 0.114
+        }
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 5 -i 0.3 -W 1 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 56(84) bytes of data.\n64 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.215 ms\n64 bytes from 10.78.0.20: icmp_seq=2 ttl=62 time=0.105 ms\n64 bytes from 10.78.0.20: icmp_seq=3 ttl=62 time=0.220 ms\n64 bytes from 10.78.0.20: icmp_seq=4 ttl=62 time=0.156 ms\n64 bytes from 10.78.0.20: icmp_seq=5 ttl=62 time=0.440 ms\n\n--- 10.78.0.20 ping statistics ---\n5 packets transmitted, 5 received, 0% packet loss, time 1219ms\nrtt min/avg/max/mdev = 0.105/0.227/0.440/0.114 ms\n",
+          "duration_ms": 1223,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 1223
+    },
+    {
+      "id": "traceroute",
+      "title": "Traceroute",
+      "status": "ok",
+      "summary": "Reached 10.78.0.20 in 3 hops.",
+      "details": {
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.2",
+            "rtt_ms": 0.065
+          },
+          {
+            "ttl": 2,
+            "ip": "10.79.0.3",
+            "rtt_ms": 0.038
+          },
+          {
+            "ttl": 3,
+            "ip": "10.78.0.20",
+            "rtt_ms": 0.018
+          }
+        ],
+        "reached": true,
+        "last_responding": {
+          "ttl": 3,
+          "ip": "10.78.0.20",
+          "rtt_ms": 0.018
+        }
+      },
+      "commands": [
+        {
+          "command": "traceroute -n -q 1 -w 1 -m 20 -I 10.78.0.20",
+          "exit_code": 0,
+          "output": "traceroute to 10.78.0.20 (10.78.0.20), 20 hops max, 60 byte packets\n 1  10.77.0.2  0.065 ms\n 2  10.79.0.3  0.038 ms\n 3  10.78.0.20  0.018 ms\n",
+          "duration_ms": 3,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 4
+    },
+    {
+      "id": "mtr",
+      "title": "MTR (per-hop loss and latency)",
+      "status": "ok",
+      "summary": "3 hops, 0% loss at the destination, avg 0.3 ms.",
+      "details": {
+        "engine": "mtr",
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.2",
+            "sent": 5,
+            "loss_pct": 0.0,
+            "avg_ms": 0.2,
+            "best_ms": 0.1,
+            "worst_ms": 0.2
+          },
+          {
+            "ttl": 2,
+            "ip": "10.79.0.3",
+            "sent": 5,
+            "loss_pct": 0.0,
+            "avg_ms": 0.2,
+            "best_ms": 0.1,
+            "worst_ms": 0.3
+          },
+          {
+            "ttl": 3,
+            "ip": "10.78.0.20",
+            "sent": 5,
+            "loss_pct": 0.0,
+            "avg_ms": 0.3,
+            "best_ms": 0.1,
+            "worst_ms": 0.6
+          }
+        ],
+        "reached": true,
+        "end_to_end_loss_pct": 0.0,
+        "loss_onset": null,
+        "rate_limited_hops": []
+      },
+      "commands": [
+        {
+          "command": "mtr --report --report-cycles 5 --no-dns 10.78.0.20",
+          "exit_code": 0,
+          "output": "Start: 2026-11-11T08:39:14+0000\nHOST: 167428a26dc2                Loss%   Snt   Last   Avg  Best  Wrst StDev\n  1.|-- 10.77.0.2                  0.0%     5    0.2   0.2   0.1   0.2   0.1\n  2.|-- 10.79.0.3                  0.0%     5    0.2   0.2   0.1   0.3   0.1\n  3.|-- 10.78.0.20                 0.0%     5    0.2   0.3   0.1   0.6   0.2\n",
+          "duration_ms": 9748,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 9749
+    },
+    {
+      "id": "mtu",
+      "title": "Path MTU (DF-bit ping sweep)",
+      "status": "warn",
+      "summary": "Packets up to 1000 bytes get through, but anything larger with Don't-Fragment set vanishes without an ICMP 'fragmentation needed' reply. That is the signature of a path-MTU black hole.",
+      "details": {
+        "measurable": true,
+        "path_mtu": 1000,
+        "blackhole": true,
+        "largest_payload": 972
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 1 -W 1 -s 56 -M do 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 56(84) bytes of data.\n64 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.055 ms\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.055/0.055/0.055/0.000 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 1472 -M do 10.78.0.20",
+          "exit_code": 1,
+          "output": "PING 10.78.0.20 (10.78.0.20) 1472(1500) bytes of data.\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms\n\n",
+          "duration_ms": 1009,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 764 -M do 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 764(792) bytes of data.\n772 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.221 ms\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.221/0.221/0.221/0.000 ms\n",
+          "duration_ms": 5,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 1118 -M do 10.78.0.20",
+          "exit_code": 1,
+          "output": "PING 10.78.0.20 (10.78.0.20) 1118(1146) bytes of data.\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms\n\n",
+          "duration_ms": 1006,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 941 -M do 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 941(969) bytes of data.\n949 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.174 ms\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.174/0.174/0.174/0.000 ms\n",
+          "duration_ms": 5,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 1029 -M do 10.78.0.20",
+          "exit_code": 1,
+          "output": "PING 10.78.0.20 (10.78.0.20) 1029(1057) bytes of data.\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms\n\n",
+          "duration_ms": 1009,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 985 -M do 10.78.0.20",
+          "exit_code": 1,
+          "output": "PING 10.78.0.20 (10.78.0.20) 985(1013) bytes of data.\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms\n\n",
+          "duration_ms": 1010,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 963 -M do 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 963(991) bytes of data.\n971 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.308 ms\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.308/0.308/0.308/0.000 ms\n",
+          "duration_ms": 5,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 974 -M do 10.78.0.20",
+          "exit_code": 1,
+          "output": "PING 10.78.0.20 (10.78.0.20) 974(1002) bytes of data.\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms\n\n",
+          "duration_ms": 1009,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 968 -M do 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 968(996) bytes of data.\n976 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.225 ms\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.225/0.225/0.225/0.000 ms\n",
+          "duration_ms": 5,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 971 -M do 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 971(999) bytes of data.\n979 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.215 ms\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.215/0.215/0.215/0.000 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 972 -M do 10.78.0.20",
+          "exit_code": 0,
+          "output": "PING 10.78.0.20 (10.78.0.20) 972(1000) bytes of data.\n980 bytes from 10.78.0.20: icmp_seq=1 ttl=62 time=0.190 ms\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.190/0.190/0.190/0.000 ms\n",
+          "duration_ms": 5,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 973 -M do 10.78.0.20",
+          "exit_code": 1,
+          "output": "PING 10.78.0.20 (10.78.0.20) 973(1001) bytes of data.\n\n--- 10.78.0.20 ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms\n\n",
+          "duration_ms": 1009,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 6091
+    },
+    {
+      "id": "ports",
+      "title": "TCP port check",
+      "status": "ok",
+      "summary": "TCP 80 is open (handshake in 1 ms).",
+      "details": {
+        "ports": [
+          {
+            "port": 80,
+            "service": "http",
+            "state": "open",
+            "note": "SYN -> SYN/ACK, handshake completed",
+            "connect_ms": 1.3
+          }
+        ],
+        "primary": {
+          "port": 80,
+          "service": "http",
+          "state": "open",
+          "note": "SYN -> SYN/ACK, handshake completed",
+          "connect_ms": 1.3
+        }
+      },
+      "commands": [
+        {
+          "command": "TCP connect() probe 10.78.0.20 ports 80",
+          "exit_code": 0,
+          "output": "   80/tcp  open            1.3 ms  SYN -> SYN/ACK, handshake completed",
+          "duration_ms": 4,
+          "timed_out": false
+        },
+        {
+          "command": "nmap -Pn -n --host-timeout 20s -p 80 10.78.0.20",
+          "exit_code": 0,
+          "output": "Starting Nmap 7.93 ( https://nmap.org ) at 2026-11-11 08:39 UTC\nNmap scan report for 10.78.0.20\nHost is up (0.00014s latency).\n\nPORT   STATE SERVICE\n80/tcp open  http\n\nNmap done: 1 IP address (1 host up) scanned in 0.06 seconds\n",
+          "duration_ms": 67,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 71
+    },
+    {
+      "id": "tls",
+      "title": "TLS handshake and certificate",
+      "status": "skip",
+      "summary": "Skipped: plain HTTP target, no TLS involved.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "http",
+      "title": "HTTP response",
+      "status": "fail",
+      "summary": "HTTP request failed: the server sent its headers (HTTP 200) but the body never arrived before the 15 s timeout.",
+      "details": {
+        "url": "http://bigfile.lab/",
+        "status_code": 200,
+        "reason": "OK",
+        "http_version": "1.0",
+        "server": "nettriage-lab Python/3.12.16",
+        "content_type": "text/plain",
+        "hsts": false,
+        "redirects": [],
+        "final_url": "http://bigfile.lab/",
+        "bytes": 0,
+        "timing_ms": {
+          "connect": 0.2,
+          "tls": 0.0,
+          "first_byte": 1.2,
+          "total": 15003.2
+        },
+        "curl_exit": 28,
+        "curl_error": "Operation timed out after 15003 milliseconds with 0 out of 200328 bytes received",
+        "error_kind": "stalled",
+        "reason_text": "the server sent its headers (HTTP 200) but the body never arrived before the 15 s timeout"
+      },
+      "commands": [
+        {
+          "command": "curl -sS -k -o /dev/null -D - --connect-timeout 5 --max-time 15 -L --max-redirs 5 -A nettriage/1.0 -w '\n__NETTRIAGE__%{http_code}|%{time_namelookup}|%{time_connect}|%{time_appconnect}|%{time_starttransfer}|%{time_total}|%{size_download}|%{num_redirects}|%{http_version}|%{url_effective}' --resolve bigfile.lab:80:10.78.0.20 http://bigfile.lab/",
+          "exit_code": 28,
+          "output": "HTTP/1.0 200 OK\nServer: nettriage-lab Python/3.12.16\nDate: Wed, 11 Nov 2026 08:39:14 GMT\nContent-Type: text/plain\nContent-Length: 200328\n\n\n__NETTRIAGE__200|0.000009|0.000158|0.000000|0.001151|15.003196|0|0|1|http://bigfile.lab/\ncurl: (28) Operation timed out after 15003 milliseconds with 0 out of 200328 bytes received\n",
+          "duration_ms": 15009,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 15010
+    }
+  ],
+  "environment": {
+    "version": "1.0.0",
+    "platform": "Linux 6.12.76-linuxkit (aarch64)",
+    "tools": {
+      "dig": true,
+      "ping": true,
+      "traceroute": true,
+      "mtr": true,
+      "nmap": true,
+      "openssl": true,
+      "curl": true,
+      "tcpdump": true
+    }
+  }
+}

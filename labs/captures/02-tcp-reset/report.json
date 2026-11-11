@@ -1,0 +1,286 @@
+{
+  "id": "57a242bd5931",
+  "target": {
+    "raw": "http://reset.lab:8080/",
+    "host": "reset.lab",
+    "scheme": "http",
+    "port": 8080,
+    "path": "/",
+    "is_ip": false,
+    "url": "http://reset.lab:8080/"
+  },
+  "started_at": "2026-11-11T08:38:47+00:00",
+  "duration_ms": 10301,
+  "resolved_ip": "10.77.0.30",
+  "overall": "fail",
+  "headline": "DNS resolves fine, TCP 8080 is open, but the HTTP request fails because the connection was reset by the peer after the request was sent.",
+  "findings": [
+    {
+      "severity": "critical",
+      "code": "HTTP_RESET",
+      "layer": "http",
+      "message": "HTTP request failed: the connection was reset by the peer after the request was sent.",
+      "evidence": "Recv failure: Connection reset by peer",
+      "remedy": "A RST after the request means a device or the server process killed the connection on purpose: a WAF/IPS rule, a proxy whose backend died, or a crashed worker. Capture on both sides and compare which side sees the RST first."
+    }
+  ],
+  "checks": [
+    {
+      "id": "dns",
+      "title": "DNS lookup",
+      "status": "ok",
+      "summary": "reset.lab resolves to 10.77.0.30 in 0 ms using 10.77.0.53.",
+      "details": {
+        "resolver": "10.77.0.53",
+        "status": "NOERROR",
+        "a": [
+          "10.77.0.30"
+        ],
+        "aaaa": [],
+        "cname": [],
+        "ttl": 60,
+        "query_ms": 0,
+        "error_kind": null
+      },
+      "commands": [
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 reset.lab A",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 36196\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0\n\n;; ANSWER SECTION:\nreset.lab.\t\t60\tIN\tA\t10.77.0.30\n\n;; Query time: 0 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:38:47 UTC 2026\n;; MSG SIZE  rcvd: 43\n\n",
+          "duration_ms": 13,
+          "timed_out": false
+        },
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 reset.lab AAAA",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 42434\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n\n;; Query time: 0 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:38:47 UTC 2026\n;; MSG SIZE  rcvd: 27\n\n",
+          "duration_ms": 17,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 31
+    },
+    {
+      "id": "ping",
+      "title": "Ping (ICMP echo)",
+      "status": "ok",
+      "summary": "5/5 replies, avg 0.2 ms, jitter 0.0 ms.",
+      "details": {
+        "sent": 5,
+        "received": 5,
+        "loss_pct": 0.0,
+        "rtt": {
+          "min": 0.117,
+          "avg": 0.16,
+          "max": 0.215,
+          "jitter": 0.037
+        }
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 5 -i 0.3 -W 1 10.77.0.30",
+          "exit_code": 0,
+          "output": "PING 10.77.0.30 (10.77.0.30) 56(84) bytes of data.\n64 bytes from 10.77.0.30: icmp_seq=1 ttl=64 time=0.188 ms\n64 bytes from 10.77.0.30: icmp_seq=2 ttl=64 time=0.215 ms\n64 bytes from 10.77.0.30: icmp_seq=3 ttl=64 time=0.159 ms\n64 bytes from 10.77.0.30: icmp_seq=4 ttl=64 time=0.122 ms\n64 bytes from 10.77.0.30: icmp_seq=5 ttl=64 time=0.117 ms\n\n--- 10.77.0.30 ping statistics ---\n5 packets transmitted, 5 received, 0% packet loss, time 1219ms\nrtt min/avg/max/mdev = 0.117/0.160/0.215/0.037 ms\n",
+          "duration_ms": 1223,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 1223
+    },
+    {
+      "id": "traceroute",
+      "title": "Traceroute",
+      "status": "ok",
+      "summary": "Reached 10.77.0.30 in 1 hop.",
+      "details": {
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.30",
+            "rtt_ms": 0.025
+          }
+        ],
+        "reached": true,
+        "last_responding": {
+          "ttl": 1,
+          "ip": "10.77.0.30",
+          "rtt_ms": 0.025
+        }
+      },
+      "commands": [
+        {
+          "command": "traceroute -n -q 1 -w 1 -m 20 -I 10.77.0.30",
+          "exit_code": 0,
+          "output": "traceroute to 10.77.0.30 (10.77.0.30), 20 hops max, 60 byte packets\n 1  10.77.0.30  0.025 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 2
+    },
+    {
+      "id": "mtr",
+      "title": "MTR (per-hop loss and latency)",
+      "status": "ok",
+      "summary": "1 hop, 0% loss at the destination, avg 0.2 ms.",
+      "details": {
+        "engine": "mtr",
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.30",
+            "sent": 5,
+            "loss_pct": 0.0,
+            "avg_ms": 0.2,
+            "best_ms": 0.1,
+            "worst_ms": 0.2
+          }
+        ],
+        "reached": true,
+        "end_to_end_loss_pct": 0.0,
+        "loss_onset": null,
+        "rate_limited_hops": []
+      },
+      "commands": [
+        {
+          "command": "mtr --report --report-cycles 5 --no-dns 10.77.0.30",
+          "exit_code": 0,
+          "output": "Start: 2026-11-11T08:38:47+0000\nHOST: 167428a26dc2                Loss%   Snt   Last   Avg  Best  Wrst StDev\n  1.|-- 10.77.0.30                 0.0%     5    0.1   0.2   0.1   0.2   0.1\n",
+          "duration_ms": 10264,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 10266
+    },
+    {
+      "id": "mtu",
+      "title": "Path MTU (DF-bit ping sweep)",
+      "status": "ok",
+      "summary": "A full 1500-byte packet crosses the path unfragmented.",
+      "details": {
+        "measurable": true,
+        "path_mtu": 1500,
+        "blackhole": false
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 1 -W 1 -s 56 -M do 10.77.0.30",
+          "exit_code": 0,
+          "output": "PING 10.77.0.30 (10.77.0.30) 56(84) bytes of data.\n64 bytes from 10.77.0.30: icmp_seq=1 ttl=64 time=0.057 ms\n\n--- 10.77.0.30 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.057/0.057/0.057/0.000 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 1472 -M do 10.77.0.30",
+          "exit_code": 0,
+          "output": "PING 10.77.0.30 (10.77.0.30) 1472(1500) bytes of data.\n1480 bytes from 10.77.0.30: icmp_seq=1 ttl=64 time=0.034 ms\n\n--- 10.77.0.30 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.034/0.034/0.034/0.000 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 5
+    },
+    {
+      "id": "ports",
+      "title": "TCP port check",
+      "status": "ok",
+      "summary": "TCP 8080 is open (handshake in 1 ms).",
+      "details": {
+        "ports": [
+          {
+            "port": 8080,
+            "service": "http-alt",
+            "state": "open",
+            "note": "SYN -> SYN/ACK, handshake completed",
+            "connect_ms": 1.2
+          }
+        ],
+        "primary": {
+          "port": 8080,
+          "service": "http-alt",
+          "state": "open",
+          "note": "SYN -> SYN/ACK, handshake completed",
+          "connect_ms": 1.2
+        }
+      },
+      "commands": [
+        {
+          "command": "TCP connect() probe 10.77.0.30 ports 8080",
+          "exit_code": 0,
+          "output": " 8080/tcp  open            1.2 ms  SYN -> SYN/ACK, handshake completed",
+          "duration_ms": 3,
+          "timed_out": false
+        },
+        {
+          "command": "nmap -Pn -n --host-timeout 20s -p 8080 10.77.0.30",
+          "exit_code": 0,
+          "output": "Starting Nmap 7.93 ( https://nmap.org ) at 2026-11-11 08:38 UTC\nNmap scan report for 10.77.0.30\nHost is up (0.000082s latency).\n\nPORT     STATE SERVICE\n8080/tcp open  http-proxy\nMAC Address: E6:40:95:55:7C:73 (Unknown)\n\nNmap done: 1 IP address (1 host up) scanned in 0.09 seconds\n",
+          "duration_ms": 115,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 119
+    },
+    {
+      "id": "tls",
+      "title": "TLS handshake and certificate",
+      "status": "skip",
+      "summary": "Skipped: plain HTTP target, no TLS involved.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "http",
+      "title": "HTTP response",
+      "status": "fail",
+      "summary": "HTTP request failed: the connection was reset by the peer after the request was sent.",
+      "details": {
+        "url": "http://reset.lab:8080/",
+        "status_code": null,
+        "reason": null,
+        "http_version": null,
+        "server": null,
+        "content_type": null,
+        "hsts": false,
+        "redirects": [],
+        "final_url": "http://reset.lab:8080/",
+        "bytes": 0,
+        "timing_ms": {
+          "connect": 0.2,
+          "tls": 0.0,
+          "first_byte": 0.0,
+          "total": 0.3
+        },
+        "curl_exit": 56,
+        "curl_error": "Recv failure: Connection reset by peer",
+        "error_kind": "reset",
+        "reason_text": "the connection was reset by the peer after the request was sent"
+      },
+      "commands": [
+        {
+          "command": "curl -sS -k -o /dev/null -D - --connect-timeout 5 --max-time 15 -L --max-redirs 5 -A nettriage/1.0 -w '\n__NETTRIAGE__%{http_code}|%{time_namelookup}|%{time_connect}|%{time_appconnect}|%{time_starttransfer}|%{time_total}|%{size_download}|%{num_redirects}|%{http_version}|%{url_effective}' --resolve reset.lab:8080:10.77.0.30 http://reset.lab:8080/",
+          "exit_code": 56,
+          "output": "\n__NETTRIAGE__000|0.000021|0.000159|0.000000|0.000000|0.000282|0|0|0|http://reset.lab:8080/\ncurl: (56) Recv failure: Connection reset by peer\n",
+          "duration_ms": 6,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 6
+    }
+  ],
+  "environment": {
+    "version": "1.0.0",
+    "platform": "Linux 6.12.76-linuxkit (aarch64)",
+    "tools": {
+      "dig": true,
+      "ping": true,
+      "traceroute": true,
+      "mtr": true,
+      "nmap": true,
+      "openssl": true,
+      "curl": true,
+      "tcpdump": true
+    }
+  }
+}

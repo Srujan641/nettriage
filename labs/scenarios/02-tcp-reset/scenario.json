@@ -1,0 +1,14 @@
+{
+  "id": "02-tcp-reset",
+  "title": "TCP reset: connection killed after the request",
+  "layer": "tcp",
+  "target": "http://reset.lab:8080/",
+  "ports": "8080",
+  "expect": "HTTP_RESET",
+  "symptom": "The port is open and the connection is accepted, but every request dies with 'connection reset by peer'.",
+  "fault": "The server accepts the TCP connection, reads the HTTP request, then aborts with SO_LINGER=0 so the kernel sends RST instead of FIN. A crashing backend or an inline IPS looks identical.",
+  "captures": {
+    "client.pcap": "Client"
+  },
+  "command": "nettriage http://reset.lab:8080/ --resolver 10.77.0.53 --ports 8080"
+}

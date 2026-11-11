@@ -1,0 +1,111 @@
+# NetTriage lab: one healthy service and four deliberately broken ones.
+#
+#   client ──lab_net──┬── dns        10.77.0.53   lab resolver (answers, NXDOMAIN, or stays silent)
+#   10.77.0.10        ├── healthy    10.77.0.20   control: valid TLS, HTTP 200
+#                     ├── reset      10.77.0.30   accepts TCP, then resets it
+#                     ├── legacy-tls 10.77.0.40   speaks TLS 1.0 only
+#                     └── r1 ──wan_net (MTU 1000)── r2 ──far_net── bigfile 10.78.0.20
+#                                 both routers drop ICMP "fragmentation needed"
+name: nettriage-lab
+
+x-lab: &lab
+  build: .
+  image: nettriage-lab:latest
+  init: true
+  volumes:
+    - ./servers:/lab/servers:ro
+    - certs:/certs
+
+services:
+  pki:
+    <<: *lab
+    command: sh /lab/servers/gen_certs.sh
+    network_mode: none
+
+  dns:
+    <<: *lab
+    command: python /lab/servers/dns_server.py
+    networks: { lab_net: { ipv4_address: 10.77.0.53 } }
+
+  healthy:
+    <<: *lab
+    command: python /lab/servers/web_server.py healthy.lab
+    depends_on: { pki: { condition: service_completed_successfully } }
+    networks: { lab_net: { ipv4_address: 10.77.0.20 } }
+
+  reset:
+    <<: *lab
+    command: python /lab/servers/reset_server.py
+    networks: { lab_net: { ipv4_address: 10.77.0.30 } }
+
+  legacy-tls:
+    <<: *lab
+    command: python /lab/servers/web_server.py legacy-tls.lab --legacy
+    depends_on: { pki: { condition: service_completed_successfully } }
+    networks: { lab_net: { ipv4_address: 10.77.0.40 } }
+
+  r1:
+    <<: *lab
+    command: sh /lab/servers/router.sh 10.78.0.0/24 10.79.0.3
+    cap_add: [NET_ADMIN, NET_RAW]
+    sysctls: { net.ipv4.ip_forward: 1 }
+    volumes:
+      - ./servers:/lab/servers:ro
+      - ./captures:/captures
+    networks:
+      lab_net: { ipv4_address: 10.77.0.2 }
+      wan_net: { ipv4_address: 10.79.0.2 }
+
+  r2:
+    <<: *lab
+    command: sh /lab/servers/router.sh 10.77.0.0/24 10.79.0.2
+    cap_add: [NET_ADMIN, NET_RAW]
+    sysctls: { net.ipv4.ip_forward: 1 }
+    volumes:
+      - ./servers:/lab/servers:ro
+      - ./captures:/captures
+    networks:
+      wan_net: { ipv4_address: 10.79.0.3 }
+      far_net: { ipv4_address: 10.78.0.2 }
+
+  bigfile:
+    <<: *lab
+    command: sh -c "ip route add 10.77.0.0/24 via 10.78.0.2 && exec python /lab/servers/bigfile_server.py"
+    cap_add: [NET_ADMIN]
+    networks: { far_net: { ipv4_address: 10.78.0.20 } }
+
+  client:
+    <<: *lab
+    command: sh /lab/servers/client.sh
+    cap_add: [NET_ADMIN, NET_RAW]
+    depends_on:
+      pki: { condition: service_completed_successfully }
+      dns: { condition: service_started }
+      healthy: { condition: service_started }
+      reset: { condition: service_started }
+      legacy-tls: { condition: service_started }
+      bigfile: { condition: service_started }
+      r1: { condition: service_started }
+      r2: { condition: service_started }
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/ready"]
+      interval: 2s
+      retries: 30
+    volumes:
+      - ./servers:/lab/servers:ro
+      - certs:/certs:ro
+      - ../backend:/app:ro
+      - ./captures:/captures
+    networks: { lab_net: { ipv4_address: 10.77.0.10 } }
+
+networks:
+  lab_net:
+    ipam: { config: [{ subnet: 10.77.0.0/24, gateway: 10.77.0.1 }] }
+  far_net:
+    ipam: { config: [{ subnet: 10.78.0.0/24, gateway: 10.78.0.1 }] }
+  wan_net:  # the narrow link: every interface on it gets MTU 1000
+    driver_opts: { com.docker.network.driver.mtu: "1000" }
+    ipam: { config: [{ subnet: 10.79.0.0/24, gateway: 10.79.0.1 }] }
+
+volumes:
+  certs:

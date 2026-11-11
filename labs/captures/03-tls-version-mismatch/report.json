@@ -1,0 +1,280 @@
+{
+  "id": "857994d01907",
+  "target": {
+    "raw": "https://legacy-tls.lab",
+    "host": "legacy-tls.lab",
+    "scheme": "https",
+    "port": 443,
+    "path": "/",
+    "is_ip": false,
+    "url": "https://legacy-tls.lab/"
+  },
+  "started_at": "2026-11-11T08:39:00+00:00",
+  "duration_ms": 10286,
+  "resolved_ip": "10.77.0.40",
+  "overall": "fail",
+  "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because client and server share no TLS version: this client offers TLSv1.2 and TLSv1.3, the server only accepts TLSv1.0.",
+  "findings": [
+    {
+      "severity": "critical",
+      "code": "TLS_VERSION_MISMATCH",
+      "layer": "tls",
+      "message": "TLS handshake failed: client and server share no TLS version: this client offers TLSv1.2 and TLSv1.3, the server only accepts TLSv1.0.",
+      "evidence": "",
+      "remedy": "Enable TLS 1.2 or 1.3 on the server (ssl_protocols / SSLProtocol), or upgrade the client. TLS 1.0 and 1.1 are deprecated (RFC 8996)."
+    }
+  ],
+  "checks": [
+    {
+      "id": "dns",
+      "title": "DNS lookup",
+      "status": "ok",
+      "summary": "legacy-tls.lab resolves to 10.77.0.40 in 0 ms using 10.77.0.53.",
+      "details": {
+        "resolver": "10.77.0.53",
+        "status": "NOERROR",
+        "a": [
+          "10.77.0.40"
+        ],
+        "aaaa": [],
+        "cname": [],
+        "ttl": 60,
+        "query_ms": 0,
+        "error_kind": null
+      },
+      "commands": [
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 legacy-tls.lab A",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 30545\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0\n\n;; ANSWER SECTION:\nlegacy-tls.lab.\t\t60\tIN\tA\t10.77.0.40\n\n;; Query time: 0 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:39:00 UTC 2026\n;; MSG SIZE  rcvd: 48\n\n",
+          "duration_ms": 13,
+          "timed_out": false
+        },
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 legacy-tls.lab AAAA",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 52972\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n\n;; Query time: 0 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:39:00 UTC 2026\n;; MSG SIZE  rcvd: 32\n\n",
+          "duration_ms": 22,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 36
+    },
+    {
+      "id": "ping",
+      "title": "Ping (ICMP echo)",
+      "status": "ok",
+      "summary": "5/5 replies, avg 0.1 ms, jitter 0.0 ms.",
+      "details": {
+        "sent": 5,
+        "received": 5,
+        "loss_pct": 0.0,
+        "rtt": {
+          "min": 0.091,
+          "avg": 0.13,
+          "max": 0.19,
+          "jitter": 0.036
+        }
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 5 -i 0.3 -W 1 10.77.0.40",
+          "exit_code": 0,
+          "output": "PING 10.77.0.40 (10.77.0.40) 56(84) bytes of data.\n64 bytes from 10.77.0.40: icmp_seq=1 ttl=64 time=0.147 ms\n64 bytes from 10.77.0.40: icmp_seq=2 ttl=64 time=0.131 ms\n64 bytes from 10.77.0.40: icmp_seq=3 ttl=64 time=0.190 ms\n64 bytes from 10.77.0.40: icmp_seq=4 ttl=64 time=0.095 ms\n64 bytes from 10.77.0.40: icmp_seq=5 ttl=64 time=0.091 ms\n\n--- 10.77.0.40 ping statistics ---\n5 packets transmitted, 5 received, 0% packet loss, time 1218ms\nrtt min/avg/max/mdev = 0.091/0.130/0.190/0.036 ms\n",
+          "duration_ms": 1221,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 1221
+    },
+    {
+      "id": "traceroute",
+      "title": "Traceroute",
+      "status": "ok",
+      "summary": "Reached 10.77.0.40 in 1 hop.",
+      "details": {
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.40",
+            "rtt_ms": 0.035
+          }
+        ],
+        "reached": true,
+        "last_responding": {
+          "ttl": 1,
+          "ip": "10.77.0.40",
+          "rtt_ms": 0.035
+        }
+      },
+      "commands": [
+        {
+          "command": "traceroute -n -q 1 -w 1 -m 20 -I 10.77.0.40",
+          "exit_code": 0,
+          "output": "traceroute to 10.77.0.40 (10.77.0.40), 20 hops max, 60 byte packets\n 1  10.77.0.40  0.035 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 3
+    },
+    {
+      "id": "mtr",
+      "title": "MTR (per-hop loss and latency)",
+      "status": "ok",
+      "summary": "1 hop, 0% loss at the destination, avg 0.1 ms.",
+      "details": {
+        "engine": "mtr",
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.40",
+            "sent": 5,
+            "loss_pct": 0.0,
+            "avg_ms": 0.1,
+            "best_ms": 0.1,
+            "worst_ms": 0.3
+          }
+        ],
+        "reached": true,
+        "end_to_end_loss_pct": 0.0,
+        "loss_onset": null,
+        "rate_limited_hops": []
+      },
+      "commands": [
+        {
+          "command": "mtr --report --report-cycles 5 --no-dns 10.77.0.40",
+          "exit_code": 0,
+          "output": "Start: 2026-11-11T08:39:00+0000\nHOST: 167428a26dc2                Loss%   Snt   Last   Avg  Best  Wrst StDev\n  1.|-- 10.77.0.40                 0.0%     5    0.1   0.1   0.1   0.3   0.1\n",
+          "duration_ms": 10246,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 10247
+    },
+    {
+      "id": "mtu",
+      "title": "Path MTU (DF-bit ping sweep)",
+      "status": "ok",
+      "summary": "A full 1500-byte packet crosses the path unfragmented.",
+      "details": {
+        "measurable": true,
+        "path_mtu": 1500,
+        "blackhole": false
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 1 -W 1 -s 56 -M do 10.77.0.40",
+          "exit_code": 0,
+          "output": "PING 10.77.0.40 (10.77.0.40) 56(84) bytes of data.\n64 bytes from 10.77.0.40: icmp_seq=1 ttl=64 time=0.038 ms\n\n--- 10.77.0.40 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.038/0.038/0.038/0.000 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 1472 -M do 10.77.0.40",
+          "exit_code": 0,
+          "output": "PING 10.77.0.40 (10.77.0.40) 1472(1500) bytes of data.\n1480 bytes from 10.77.0.40: icmp_seq=1 ttl=64 time=0.046 ms\n\n--- 10.77.0.40 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.046/0.046/0.046/0.000 ms\n",
+          "duration_ms": 3,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 5
+    },
+    {
+      "id": "ports",
+      "title": "TCP port check",
+      "status": "ok",
+      "summary": "TCP 443 is open (handshake in 1 ms).",
+      "details": {
+        "ports": [
+          {
+            "port": 443,
+            "service": "https",
+            "state": "open",
+            "note": "SYN -> SYN/ACK, handshake completed",
+            "connect_ms": 1.4
+          }
+        ],
+        "primary": {
+          "port": 443,
+          "service": "https",
+          "state": "open",
+          "note": "SYN -> SYN/ACK, handshake completed",
+          "connect_ms": 1.4
+        }
+      },
+      "commands": [
+        {
+          "command": "TCP connect() probe 10.77.0.40 ports 443",
+          "exit_code": 0,
+          "output": "  443/tcp  open            1.4 ms  SYN -> SYN/ACK, handshake completed",
+          "duration_ms": 4,
+          "timed_out": false
+        },
+        {
+          "command": "nmap -Pn -n --host-timeout 20s -p 443 10.77.0.40",
+          "exit_code": 0,
+          "output": "Starting Nmap 7.93 ( https://nmap.org ) at 2026-11-11 08:39 UTC\nNmap scan report for 10.77.0.40\nHost is up (0.000062s latency).\n\nPORT    STATE SERVICE\n443/tcp open  https\nMAC Address: BA:45:10:8E:FC:76 (Unknown)\n\nNmap done: 1 IP address (1 host up) scanned in 0.12 seconds\n",
+          "duration_ms": 138,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 143
+    },
+    {
+      "id": "tls",
+      "title": "TLS handshake and certificate",
+      "status": "fail",
+      "summary": "TLS handshake failed: client and server share no TLS version: this client offers TLSv1.2 and TLSv1.3, the server only accepts TLSv1.0.",
+      "details": {
+        "pq_intolerant": false,
+        "handshake_ok": false,
+        "protocol": null,
+        "cipher": null,
+        "versions": {
+          "TLSv1.0": true,
+          "TLSv1.1": false,
+          "TLSv1.2": false,
+          "TLSv1.3": false
+        },
+        "client_max": null,
+        "chain_length": 0,
+        "error_kind": "version_mismatch",
+        "reason": "client and server share no TLS version: this client offers TLSv1.2 and TLSv1.3, the server only accepts TLSv1.0"
+      },
+      "commands": [
+        {
+          "command": "openssl s_client -connect 10.77.0.40:443 -showcerts -servername legacy-tls.lab -verify_hostname legacy-tls.lab -min_protocol TLSv1.2",
+          "exit_code": 1,
+          "output": "CONNECTED(00000003)\n---\nno peer certificate available\n---\nNo client certificate CA names sent\n---\nSSL handshake has read 7 bytes and written 316 bytes\nVerification: OK\n---\nNew, (NONE), Cipher is (NONE)\nSecure Renegotiation IS NOT supported\nCompression: NONE\nExpansion: NONE\nNo ALPN negotiated\nEarly data was not sent\nVerify return code: 0 (ok)\n---\n20D0518DFFFF0000:error:0A00042E:SSL routines:ssl3_read_bytes:tlsv1 alert protocol version:../ssl/record/rec_layer_s3.c:1602:SSL alert number 70\n",
+          "duration_ms": 27,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 33
+    },
+    {
+      "id": "http",
+      "title": "HTTP response",
+      "status": "skip",
+      "summary": "Skipped: HTTPS needs a TLS session and the handshake failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    }
+  ],
+  "environment": {
+    "version": "1.0.0",
+    "platform": "Linux 6.12.76-linuxkit (aarch64)",
+    "tools": {
+      "dig": true,
+      "ping": true,
+      "traceroute": true,
+      "mtr": true,
+      "nmap": true,
+      "openssl": true,
+      "curl": true,
+      "tcpdump": true
+    }
+  }
+}

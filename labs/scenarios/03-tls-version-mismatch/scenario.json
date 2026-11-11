@@ -1,0 +1,14 @@
+{
+  "id": "03-tls-version-mismatch",
+  "title": "TLS version mismatch: a TLS 1.0-only server",
+  "layer": "tls",
+  "target": "https://legacy-tls.lab",
+  "ports": "443",
+  "expect": "TLS_VERSION_MISMATCH",
+  "symptom": "TCP 443 is open but every modern client fails the handshake immediately.",
+  "fault": "The server is pinned to TLS 1.0. Modern clients offer TLS 1.2 and 1.3 only, so there is no version in common.",
+  "captures": {
+    "client.pcap": "Client"
+  },
+  "command": "nettriage https://legacy-tls.lab --resolver 10.77.0.53 --ports 443"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "01-dns-failure",
+  "title": "DNS failure: the resolver goes silent",
+  "layer": "dns",
+  "target": "https://app.silent.lab",
+  "ports": "443",
+  "expect": "DNS_TIMEOUT",
+  "symptom": "The site 'is down' for users, yet the web server is perfectly healthy. Names simply never resolve.",
+  "fault": "The lab DNS server receives queries for *.silent.lab and deliberately never replies, like a resolver that crashed or sits behind a firewall dropping UDP 53.",
+  "extra": [
+    {
+      "target": "https://ghost.lab",
+      "pcap": "nxdomain.pcap"
+    }
+  ],
+  "captures": {
+    "client.pcap": "Silent resolver",
+    "nxdomain.pcap": "NXDOMAIN contrast"
+  },
+  "command": "nettriage https://app.silent.lab --resolver 10.77.0.53 --ports 443"
+}

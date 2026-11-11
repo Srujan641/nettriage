@@ -1,0 +1,14 @@
+{
+  "id": "00-baseline",
+  "title": "Baseline: a healthy service",
+  "layer": "control",
+  "target": "https://healthy.lab",
+  "ports": "443",
+  "expect": "",
+  "symptom": "Nothing is wrong. This is the control run that shows what a clean capture looks like.",
+  "fault": "None. healthy.lab serves a valid certificate from the lab CA over TLS 1.3.",
+  "captures": {
+    "client.pcap": "Client"
+  },
+  "command": "nettriage https://healthy.lab --resolver 10.77.0.53 --ports 443"
+}

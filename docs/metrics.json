@@ -1,0 +1,463 @@
+{
+  "summary": {
+    "date": "2026-11-11",
+    "runs": 30,
+    "distinct_targets": 18,
+    "distinct_fault_types": 12,
+    "root_cause_correct": 22,
+    "fault_runs": 23,
+    "healthy_runs": 7,
+    "false_alarms": 0,
+    "median_seconds": 13.2,
+    "p90_seconds": 18.3,
+    "captures_total": 7,
+    "captures_correct": 7,
+    "capture_packets": 670,
+    "packets_per_second": 156557
+  },
+  "cases": [
+    {
+      "where": "internet",
+      "layer": "control",
+      "target": "https://github.com",
+      "fault": "healthy site",
+      "expected": "(healthy)",
+      "got": "(healthy)",
+      "pass": true,
+      "seconds": 18.3,
+      "headline": "Everything checks out: DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "control",
+      "target": "https://www.cloudflare.com",
+      "fault": "healthy site",
+      "expected": "(healthy)",
+      "got": "(healthy)",
+      "pass": true,
+      "seconds": 9.2,
+      "headline": "Everything checks out: DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "control",
+      "target": "https://1.1.1.1",
+      "fault": "healthy, IP literal",
+      "expected": "(healthy)",
+      "got": "(healthy)",
+      "pass": true,
+      "seconds": 8.2,
+      "headline": "Everything checks out: TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "dns",
+      "target": "https://nettriage-no-such-name-zz91.com",
+      "fault": "name does not exist",
+      "expected": "DNS_NXDOMAIN",
+      "got": "DNS_NXDOMAIN",
+      "pass": true,
+      "seconds": 6.1,
+      "headline": "DNS fails: nettriage-no-such-name-zz91.com does not exist (NXDOMAIN).",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "tcp",
+      "target": "http://localhost:9",
+      "fault": "nothing listening (RST)",
+      "expected": "TCP_PORT_CLOSED",
+      "got": "TCP_PORT_CLOSED",
+      "pass": true,
+      "seconds": 1.2,
+      "headline": "DNS resolves fine, but TCP 9 is closed: the host answers the SYN with a reset, so nothing is accepting connections on that port.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "tcp",
+      "target": "https://example.com:81",
+      "fault": "firewalled port (silence)",
+      "expected": "TCP_PORT_FILTERED",
+      "got": "TCP_PORT_FILTERED",
+      "pass": true,
+      "seconds": 8.2,
+      "headline": "DNS resolves fine, but TCP 81 is filtered: the host is alive (it answers ping) but SYNs to that port are silently dropped, which points at a firewall.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://expired.badssl.com",
+      "fault": "expired certificate",
+      "expected": "TLS_CERT_EXPIRED",
+      "got": "TCP_PORT_FILTERED",
+      "pass": false,
+      "seconds": 15.2,
+      "headline": "DNS resolves fine, but the host is unreachable: TCP 443 gets no answer, ping gets no answer, and the path goes quiet after hop 5 (142.250.169.206).",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://wrong.host.badssl.com",
+      "fault": "certificate for another name",
+      "expected": "TLS_HOSTNAME_MISMATCH",
+      "got": "TLS_HOSTNAME_MISMATCH",
+      "pass": true,
+      "seconds": 15.2,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because the certificate is for *.badssl.com, badssl.com, not wrong.host.badssl.com.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://self-signed.badssl.com",
+      "fault": "self-signed certificate",
+      "expected": "TLS_SELF_SIGNED",
+      "got": "TLS_SELF_SIGNED",
+      "pass": true,
+      "seconds": 23.9,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because the certificate is self-signed, so no client trusts it by default.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://untrusted-root.badssl.com",
+      "fault": "unknown root CA",
+      "expected": "TLS_UNTRUSTED_CHAIN",
+      "got": "TLS_UNTRUSTED_CHAIN",
+      "pass": true,
+      "seconds": 18.3,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because the certificate chain cannot be verified (self-signed certificate in certificate chain).",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://tls-v1-0.badssl.com:1010",
+      "fault": "TLS 1.0-only server",
+      "expected": "TLS_VERSION_MISMATCH",
+      "got": "TLS_VERSION_MISMATCH",
+      "pass": true,
+      "seconds": 15.2,
+      "headline": "DNS resolves fine, TCP 1010 is open, but the TLS handshake fails because client and server share no TLS version: this client offers TLSv1.2 and TLSv1.3, the server only accepts TLSv1.0.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "http",
+      "target": "https://httpbin.org/status/503",
+      "fault": "application returns 503",
+      "expected": "HTTP_5XX",
+      "got": "HTTP_5XX",
+      "pass": true,
+      "seconds": 14.0,
+      "headline": "DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3), but the server answers HTTP 503: the network is fine and the application behind it is failing.",
+      "round": 1
+    },
+    {
+      "where": "internet",
+      "layer": "control",
+      "target": "https://github.com",
+      "fault": "healthy site",
+      "expected": "(healthy)",
+      "got": "(healthy)",
+      "pass": true,
+      "seconds": 18.3,
+      "headline": "Everything checks out: DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "control",
+      "target": "https://www.cloudflare.com",
+      "fault": "healthy site",
+      "expected": "(healthy)",
+      "got": "(healthy)",
+      "pass": true,
+      "seconds": 8.2,
+      "headline": "Reachable, with warnings: DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200. Worth a look: 20% loss end to end. Loss begins at hop 6 (104.16.123.96) and continues to the destination, so that hop or its link is dropping traffic.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "control",
+      "target": "https://1.1.1.1",
+      "fault": "healthy, IP literal",
+      "expected": "(healthy)",
+      "got": "(healthy)",
+      "pass": true,
+      "seconds": 8.2,
+      "headline": "Everything checks out: TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "dns",
+      "target": "https://nettriage-no-such-name-zz91.com",
+      "fault": "name does not exist",
+      "expected": "DNS_NXDOMAIN",
+      "got": "DNS_NXDOMAIN",
+      "pass": true,
+      "seconds": 6.1,
+      "headline": "DNS fails: nettriage-no-such-name-zz91.com does not exist (NXDOMAIN).",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "tcp",
+      "target": "http://localhost:9",
+      "fault": "nothing listening (RST)",
+      "expected": "TCP_PORT_CLOSED",
+      "got": "TCP_PORT_CLOSED",
+      "pass": true,
+      "seconds": 1.2,
+      "headline": "DNS resolves fine, but TCP 9 is closed: the host answers the SYN with a reset, so nothing is accepting connections on that port.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "tcp",
+      "target": "https://example.com:81",
+      "fault": "firewalled port (silence)",
+      "expected": "TCP_PORT_FILTERED",
+      "got": "TCP_PORT_FILTERED",
+      "pass": true,
+      "seconds": 8.2,
+      "headline": "DNS resolves fine, but TCP 81 is filtered: the host is alive (it answers ping) but SYNs to that port are silently dropped, which points at a firewall.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://expired.badssl.com",
+      "fault": "expired certificate",
+      "expected": "TLS_CERT_EXPIRED",
+      "got": "TLS_CERT_EXPIRED",
+      "pass": true,
+      "seconds": 15.2,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because the certificate expired 4230 days ago (2015-04-12).",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://wrong.host.badssl.com",
+      "fault": "certificate for another name",
+      "expected": "TLS_HOSTNAME_MISMATCH",
+      "got": "TLS_HOSTNAME_MISMATCH",
+      "pass": true,
+      "seconds": 22.5,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because the certificate is for *.badssl.com, badssl.com, not wrong.host.badssl.com.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://self-signed.badssl.com",
+      "fault": "self-signed certificate",
+      "expected": "TLS_SELF_SIGNED",
+      "got": "TLS_SELF_SIGNED",
+      "pass": true,
+      "seconds": 20.9,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because the certificate is self-signed, so no client trusts it by default.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://untrusted-root.badssl.com",
+      "fault": "unknown root CA",
+      "expected": "TLS_UNTRUSTED_CHAIN",
+      "got": "TLS_UNTRUSTED_CHAIN",
+      "pass": true,
+      "seconds": 15.1,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because the certificate chain cannot be verified (self-signed certificate in certificate chain).",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "tls",
+      "target": "https://tls-v1-0.badssl.com:1010",
+      "fault": "TLS 1.0-only server",
+      "expected": "TLS_VERSION_MISMATCH",
+      "got": "TLS_VERSION_MISMATCH",
+      "pass": true,
+      "seconds": 15.1,
+      "headline": "DNS resolves fine, TCP 1010 is open, but the TLS handshake fails because client and server share no TLS version: this client offers TLSv1.2 and TLSv1.3, the server only accepts TLSv1.0.",
+      "round": 2
+    },
+    {
+      "where": "internet",
+      "layer": "http",
+      "target": "https://httpbin.org/status/503",
+      "fault": "application returns 503",
+      "expected": "HTTP_5XX",
+      "got": "HTTP_5XX",
+      "pass": true,
+      "seconds": 16.3,
+      "headline": "DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3), but the server answers HTTP 503: the network is fine and the application behind it is failing.",
+      "round": 2
+    },
+    {
+      "where": "lab",
+      "layer": "control",
+      "target": "https://healthy.lab",
+      "fault": "healthy lab server",
+      "expected": "(healthy)",
+      "got": "(healthy)",
+      "pass": true,
+      "seconds": 10.7,
+      "headline": "Everything checks out: DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200.",
+      "round": 1
+    },
+    {
+      "where": "lab",
+      "layer": "dns",
+      "target": "https://app.silent.lab",
+      "fault": "resolver never answers",
+      "expected": "DNS_TIMEOUT",
+      "got": "DNS_TIMEOUT",
+      "pass": true,
+      "seconds": 12.4,
+      "headline": "DNS fails: 10.77.0.53 does not answer DNS queries.",
+      "round": 1
+    },
+    {
+      "where": "lab",
+      "layer": "dns",
+      "target": "https://ghost.lab",
+      "fault": "name does not exist",
+      "expected": "DNS_NXDOMAIN",
+      "got": "DNS_NXDOMAIN",
+      "pass": true,
+      "seconds": 0.4,
+      "headline": "DNS fails: ghost.lab does not exist (NXDOMAIN).",
+      "round": 1
+    },
+    {
+      "where": "lab",
+      "layer": "tcp",
+      "target": "http://reset.lab:8080/",
+      "fault": "RST after the request",
+      "expected": "HTTP_RESET",
+      "got": "HTTP_RESET",
+      "pass": true,
+      "seconds": 10.6,
+      "headline": "DNS resolves fine, TCP 8080 is open, but the HTTP request fails because the connection was reset by the peer after the request was sent.",
+      "round": 1
+    },
+    {
+      "where": "lab",
+      "layer": "tls",
+      "target": "https://legacy-tls.lab",
+      "fault": "TLS 1.0-only server",
+      "expected": "TLS_VERSION_MISMATCH",
+      "got": "TLS_VERSION_MISMATCH",
+      "pass": true,
+      "seconds": 10.7,
+      "headline": "DNS resolves fine, TCP 443 is open, but the TLS handshake fails because client and server share no TLS version: this client offers TLSv1.2 and TLSv1.3, the server only accepts TLSv1.0.",
+      "round": 1
+    },
+    {
+      "where": "lab",
+      "layer": "network",
+      "target": "http://bigfile.lab/",
+      "fault": "path-MTU black hole",
+      "expected": "MTU_BLACKHOLE",
+      "got": "MTU_BLACKHOLE",
+      "pass": true,
+      "seconds": 15.4,
+      "headline": "DNS resolves fine, TCP 80 is open, but the HTTP response stalls because of a path-MTU black hole: only packets up to 1000 bytes cross the path, larger ones are dropped, and the ICMP 'fragmentation needed' message that should tell the sender to shrink them never arrives.",
+      "round": 1
+    }
+  ],
+  "captures": [
+    {
+      "capture": "00-baseline/client.pcap",
+      "packets": 145,
+      "expected": [
+        "none"
+      ],
+      "flagged": [
+        "none"
+      ],
+      "pass": true
+    },
+    {
+      "capture": "01-dns-failure/client.pcap",
+      "packets": 4,
+      "expected": [
+        "dns"
+      ],
+      "flagged": [
+        "dns"
+      ],
+      "pass": true
+    },
+    {
+      "capture": "01-dns-failure/nxdomain.pcap",
+      "packets": 4,
+      "expected": [
+        "dns"
+      ],
+      "flagged": [
+        "dns"
+      ],
+      "pass": true
+    },
+    {
+      "capture": "02-tcp-reset/client.pcap",
+      "packets": 77,
+      "expected": [
+        "tcp"
+      ],
+      "flagged": [
+        "tcp"
+      ],
+      "pass": true
+    },
+    {
+      "capture": "03-tls-version-mismatch/client.pcap",
+      "packets": 123,
+      "expected": [
+        "tls"
+      ],
+      "flagged": [
+        "tls"
+      ],
+      "pass": true
+    },
+    {
+      "capture": "04-mtu-blackhole/client.pcap",
+      "packets": 122,
+      "expected": [
+        "mtu",
+        "tcp"
+      ],
+      "flagged": [
+        "mtu",
+        "tcp"
+      ],
+      "pass": true
+    },
+    {
+      "capture": "04-mtu-blackhole/r2.pcap",
+      "packets": 195,
+      "expected": [
+        "mtu",
+        "tcp"
+      ],
+      "flagged": [
+        "mtu",
+        "tcp"
+      ],
+      "pass": true
+    }
+  ]
+}

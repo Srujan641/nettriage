@@ -1,0 +1,16 @@
+{
+  "id": "04-mtu-blackhole",
+  "title": "MTU / fragmentation: a path-MTU black hole",
+  "layer": "network",
+  "target": "http://bigfile.lab/",
+  "ports": "80",
+  "expect": "MTU_BLACKHOLE",
+  "symptom": "Ping works, the port is open, the request is accepted and the response headers arrive. Then the download hangs forever.",
+  "fault": "The link between routers r1 and r2 has an MTU of 1000 bytes, and both routers drop the ICMP 'fragmentation needed' errors (type 3, code 4) that path-MTU discovery relies on.",
+  "router": "r2",
+  "captures": {
+    "client.pcap": "Client",
+    "r2.pcap": "Router r2"
+  },
+  "command": "nettriage http://bigfile.lab/ --resolver 10.77.0.53 --ports 80"
+}

@@ -1,0 +1,139 @@
+{
+  "id": "399699ed5c4d",
+  "target": {
+    "raw": "https://app.silent.lab",
+    "host": "app.silent.lab",
+    "scheme": "https",
+    "port": 443,
+    "path": "/",
+    "is_ip": false,
+    "url": "https://app.silent.lab/"
+  },
+  "started_at": "2026-11-11T08:38:30+00:00",
+  "duration_ms": 12065,
+  "resolved_ip": null,
+  "overall": "fail",
+  "headline": "DNS fails: 10.77.0.53 does not answer DNS queries.",
+  "findings": [
+    {
+      "severity": "critical",
+      "code": "DNS_TIMEOUT",
+      "layer": "dns",
+      "message": "No reply from DNS server 10.77.0.53: the query for app.silent.lab timed out.",
+      "evidence": "dig status: TIMEOUT",
+      "remedy": "The DNS server never replied. Check it is running and that UDP and TCP port 53 are allowed between you and it; try another resolver to confirm."
+    }
+  ],
+  "checks": [
+    {
+      "id": "dns",
+      "title": "DNS lookup",
+      "status": "fail",
+      "summary": "No reply from DNS server 10.77.0.53: the query for app.silent.lab timed out.",
+      "details": {
+        "resolver": "10.77.0.53",
+        "status": "TIMEOUT",
+        "a": [],
+        "aaaa": [],
+        "cname": [],
+        "ttl": null,
+        "query_ms": null,
+        "error_kind": "timeout"
+      },
+      "commands": [
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 app.silent.lab A",
+          "exit_code": 9,
+          "output": ";; communications error to 10.77.0.53#53: timed out\n;; communications error to 10.77.0.53#53: timed out\n;; no servers could be reached\n",
+          "duration_ms": 6029,
+          "timed_out": false
+        },
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 app.silent.lab AAAA",
+          "exit_code": 9,
+          "output": ";; communications error to 10.77.0.53#53: timed out\n;; communications error to 10.77.0.53#53: timed out\n;; no servers could be reached\n",
+          "duration_ms": 6030,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 12060
+    },
+    {
+      "id": "ping",
+      "title": "Ping (ICMP echo)",
+      "status": "skip",
+      "summary": "Skipped: there is no IP address to test because DNS failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "traceroute",
+      "title": "Traceroute",
+      "status": "skip",
+      "summary": "Skipped: there is no IP address to test because DNS failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "mtr",
+      "title": "MTR (per-hop loss and latency)",
+      "status": "skip",
+      "summary": "Skipped: there is no IP address to test because DNS failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "mtu",
+      "title": "Path MTU (DF-bit ping sweep)",
+      "status": "skip",
+      "summary": "Skipped: there is no IP address to test because DNS failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "ports",
+      "title": "TCP port check",
+      "status": "skip",
+      "summary": "Skipped: there is no IP address to test because DNS failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "tls",
+      "title": "TLS handshake and certificate",
+      "status": "skip",
+      "summary": "Skipped: there is no IP address to test because DNS failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    },
+    {
+      "id": "http",
+      "title": "HTTP response",
+      "status": "skip",
+      "summary": "Skipped: there is no IP address to test because DNS failed.",
+      "details": {},
+      "commands": [],
+      "duration_ms": 0
+    }
+  ],
+  "environment": {
+    "version": "1.0.0",
+    "platform": "Linux 6.12.76-linuxkit (aarch64)",
+    "tools": {
+      "dig": true,
+      "ping": true,
+      "traceroute": true,
+      "mtr": true,
+      "nmap": true,
+      "openssl": true,
+      "curl": true,
+      "tcpdump": true
+    }
+  }
+}

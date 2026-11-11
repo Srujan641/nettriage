@@ -1,0 +1,325 @@
+{
+  "id": "1e5727b515c5",
+  "target": {
+    "raw": "https://healthy.lab",
+    "host": "healthy.lab",
+    "scheme": "https",
+    "port": 443,
+    "path": "/",
+    "is_ip": false,
+    "url": "https://healthy.lab/"
+  },
+  "started_at": "2026-11-11T08:38:17+00:00",
+  "duration_ms": 10318,
+  "resolved_ip": "10.77.0.20",
+  "overall": "ok",
+  "headline": "Everything checks out: DNS resolves fine, TCP 443 is open, the TLS handshake succeeds (TLSv1.3) and the server answers HTTP 200.",
+  "findings": [],
+  "checks": [
+    {
+      "id": "dns",
+      "title": "DNS lookup",
+      "status": "ok",
+      "summary": "healthy.lab resolves to 10.77.0.20 in 1 ms using 10.77.0.53.",
+      "details": {
+        "resolver": "10.77.0.53",
+        "status": "NOERROR",
+        "a": [
+          "10.77.0.20"
+        ],
+        "aaaa": [],
+        "cname": [],
+        "ttl": 60,
+        "query_ms": 1,
+        "error_kind": null
+      },
+      "commands": [
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 healthy.lab A",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 13217\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0\n\n;; ANSWER SECTION:\nhealthy.lab.\t\t60\tIN\tA\t10.77.0.20\n\n;; Query time: 1 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:38:17 UTC 2026\n;; MSG SIZE  rcvd: 45\n\n",
+          "duration_ms": 30,
+          "timed_out": false
+        },
+        {
+          "command": "dig +time=3 +tries=2 +noall +comments +answer +stats @10.77.0.53 healthy.lab AAAA",
+          "exit_code": 0,
+          "output": ";; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 45387\n;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0\n\n;; Query time: 1 msec\n;; SERVER: 10.77.0.53#53(10.77.0.53) (UDP)\n;; WHEN: Wed Nov 11 08:38:17 UTC 2026\n;; MSG SIZE  rcvd: 29\n\n",
+          "duration_ms": 21,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 52
+    },
+    {
+      "id": "ping",
+      "title": "Ping (ICMP echo)",
+      "status": "ok",
+      "summary": "5/5 replies, avg 0.4 ms, jitter 0.5 ms.",
+      "details": {
+        "sent": 5,
+        "received": 5,
+        "loss_pct": 0.0,
+        "rtt": {
+          "min": 0.114,
+          "avg": 0.388,
+          "max": 1.398,
+          "jitter": 0.505
+        }
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 5 -i 0.3 -W 1 10.77.0.20",
+          "exit_code": 0,
+          "output": "PING 10.77.0.20 (10.77.0.20) 56(84) bytes of data.\n64 bytes from 10.77.0.20: icmp_seq=1 ttl=64 time=0.156 ms\n64 bytes from 10.77.0.20: icmp_seq=2 ttl=64 time=0.146 ms\n64 bytes from 10.77.0.20: icmp_seq=3 ttl=64 time=0.127 ms\n64 bytes from 10.77.0.20: icmp_seq=4 ttl=64 time=1.40 ms\n64 bytes from 10.77.0.20: icmp_seq=5 ttl=64 time=0.114 ms\n\n--- 10.77.0.20 ping statistics ---\n5 packets transmitted, 5 received, 0% packet loss, time 1219ms\nrtt min/avg/max/mdev = 0.114/0.388/1.398/0.505 ms\n",
+          "duration_ms": 1228,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 1228
+    },
+    {
+      "id": "traceroute",
+      "title": "Traceroute",
+      "status": "ok",
+      "summary": "Reached 10.77.0.20 in 1 hop.",
+      "details": {
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.20",
+            "rtt_ms": 0.022
+          }
+        ],
+        "reached": true,
+        "last_responding": {
+          "ttl": 1,
+          "ip": "10.77.0.20",
+          "rtt_ms": 0.022
+        }
+      },
+      "commands": [
+        {
+          "command": "traceroute -n -q 1 -w 1 -m 20 -I 10.77.0.20",
+          "exit_code": 0,
+          "output": "traceroute to 10.77.0.20 (10.77.0.20), 20 hops max, 60 byte packets\n 1  10.77.0.20  0.022 ms\n",
+          "duration_ms": 1,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 3
+    },
+    {
+      "id": "mtr",
+      "title": "MTR (per-hop loss and latency)",
+      "status": "ok",
+      "summary": "1 hop, 0% loss at the destination, avg 0.1 ms.",
+      "details": {
+        "engine": "mtr",
+        "hops": [
+          {
+            "ttl": 1,
+            "ip": "10.77.0.20",
+            "sent": 5,
+            "loss_pct": 0.0,
+            "avg_ms": 0.1,
+            "best_ms": 0.1,
+            "worst_ms": 0.3
+          }
+        ],
+        "reached": true,
+        "end_to_end_loss_pct": 0.0,
+        "loss_onset": null,
+        "rate_limited_hops": []
+      },
+      "commands": [
+        {
+          "command": "mtr --report --report-cycles 5 --no-dns 10.77.0.20",
+          "exit_code": 0,
+          "output": "Start: 2026-11-11T08:38:17+0000\nHOST: 167428a26dc2                Loss%   Snt   Last   Avg  Best  Wrst StDev\n  1.|-- 10.77.0.20                 0.0%     5    0.1   0.1   0.1   0.3   0.1\n",
+          "duration_ms": 10262,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 10263
+    },
+    {
+      "id": "mtu",
+      "title": "Path MTU (DF-bit ping sweep)",
+      "status": "ok",
+      "summary": "A full 1500-byte packet crosses the path unfragmented.",
+      "details": {
+        "measurable": true,
+        "path_mtu": 1500,
+        "blackhole": false
+      },
+      "commands": [
+        {
+          "command": "ping -n -c 1 -W 1 -s 56 -M do 10.77.0.20",
+          "exit_code": 0,
+          "output": "PING 10.77.0.20 (10.77.0.20) 56(84) bytes of data.\n64 bytes from 10.77.0.20: icmp_seq=1 ttl=64 time=0.031 ms\n\n--- 10.77.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.031/0.031/0.031/0.000 ms\n",
+          "duration_ms": 3,
+          "timed_out": false
+        },
+        {
+          "command": "ping -n -c 1 -W 1 -s 1472 -M do 10.77.0.20",
+          "exit_code": 0,
+          "output": "PING 10.77.0.20 (10.77.0.20) 1472(1500) bytes of data.\n1480 bytes from 10.77.0.20: icmp_seq=1 ttl=64 time=0.116 ms\n\n--- 10.77.0.20 ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss, time 0ms\nrtt min/avg/max/mdev = 0.116/0.116/0.116/0.000 ms\n",
+          "duration_ms": 2,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 6
+    },
+    {
+      "id": "ports",
+      "title": "TCP port check",
+      "status": "ok",
+      "summary": "TCP 443 is open (handshake in 1 ms).",
+      "details": {
+        "ports": [
+          {
+            "port": 443,
+            "service": "https",
+            "state": "open",
+            "note": "SYN -> SYN/ACK, handshake completed",
+            "connect_ms": 0.8
+          }
+        ],
+        "primary": {
+          "port": 443,
+          "service": "https",
+          "state": "open",
+          "note": "SYN -> SYN/ACK, handshake completed",
+          "connect_ms": 0.8
+        }
+      },
+      "commands": [
+        {
+          "command": "TCP connect() probe 10.77.0.20 ports 443",
+          "exit_code": 0,
+          "output": "  443/tcp  open            0.8 ms  SYN -> SYN/ACK, handshake completed",
+          "duration_ms": 2,
+          "timed_out": false
+        },
+        {
+          "command": "nmap -Pn -n --host-timeout 20s -p 443 10.77.0.20",
+          "exit_code": 0,
+          "output": "Starting Nmap 7.93 ( https://nmap.org ) at 2026-11-11 08:38 UTC\nNmap scan report for 10.77.0.20\nHost is up (0.00013s latency).\n\nPORT    STATE SERVICE\n443/tcp open  https\nMAC Address: 7E:20:BF:5B:C6:B9 (Unknown)\n\nNmap done: 1 IP address (1 host up) scanned in 0.10 seconds\n",
+          "duration_ms": 122,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 126
+    },
+    {
+      "id": "tls",
+      "title": "TLS handshake and certificate",
+      "status": "ok",
+      "summary": "Handshake completes with TLSv1.3 (TLS_AES_256_GCM_SHA384); certificate for healthy.lab is valid for 59 more days (issuer: NetTriage Lab).",
+      "details": {
+        "pq_intolerant": false,
+        "handshake_ok": true,
+        "protocol": "TLSv1.3",
+        "cipher": "TLS_AES_256_GCM_SHA384",
+        "versions": {
+          "TLSv1.0": false,
+          "TLSv1.1": false,
+          "TLSv1.2": true,
+          "TLSv1.3": true
+        },
+        "client_max": null,
+        "chain_length": 1,
+        "error_kind": null,
+        "certificate": {
+          "subject": "O = NetTriage Lab, CN = healthy.lab",
+          "issuer": "O = NetTriage Lab, CN = NetTriage Lab Root CA",
+          "serial": "5DC1B878A18577421885F63D3B7BA4BF7A0EFB48",
+          "sha256": "DB:02:E9:07:66:74:D0:64:E4:98:8D:54:02:5D:D3:0D:45:57:62:93:81:14:AE:B2:DF:A8:4C:3B:E2:13:51:F5",
+          "common_name": "healthy.lab",
+          "issuer_name": "NetTriage Lab",
+          "not_before": "2026-11-11T08:11:31+00:00",
+          "not_after": "2027-01-10T08:11:31+00:00",
+          "san": [
+            "healthy.lab"
+          ],
+          "key_bits": 2048,
+          "signature_algorithm": "sha256WithRSAEncryption",
+          "self_signed": false,
+          "days_left": 59
+        },
+        "verify_code": 0,
+        "verify_text": "ok",
+        "hostname_match": true
+      },
+      "commands": [
+        {
+          "command": "openssl s_client -connect 10.77.0.20:443 -showcerts -servername healthy.lab -verify_hostname healthy.lab -min_protocol TLSv1.2",
+          "exit_code": 0,
+          "output": "CONNECTED(00000003)\n---\nCertificate chain\n 0 s:O = NetTriage Lab, CN = healthy.lab\n   i:O = NetTriage Lab, CN = NetTriage Lab Root CA\n   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256\n   v:NotBefore: Nov 11 08:11:31 2026 GMT; NotAfter: Jan 10 08:11:31 2027 GMT\n-----BEGIN CERTIFICATE-----\nMIIDWTCCAkGgAwIBAgIUXcG4eKGFd0IYhfY9O3ukv3oO+0gwDQYJKoZIhvcNAQEL\nBQAwODEWMBQGA1UECgwNTmV0VHJpYWdlIExhYjEeMBwGA1UEAwwVTmV0VHJpYWdl\nIExhYiBSb290IENBMB4XDTI2MTExMTA4MTEzMVoXDTI3MDExMDA4MTEzMVowLjEW\nMBQGA1UECgwNTmV0VHJpYWdlIExhYjEUMBIGA1UEAwwLaGVhbHRoeS5sYWIwggEi\nMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDoVhWvtPMw7FnQg4dE86ejKuNy\nBlu78NaEFuBxVHn2XqjDJWgrMHLLQvjmOjdXEoFdiG8C8mIisia1vC/5qI3t0FIc\nIiMyKkkxdF7z24hvTUuigr5wmpsp6w0ZR2GjGLMnqepRqItbwz1+TfKvuuM48AS+\n7JxlCYsBBtEev2gh88YHrdjEE2Ln0csP/g2yxM/9PSZacgF5a7cOXYt5Ej0z2WsF\nAfBlK7WhmtqWV3lmHSwgF9rSISO99vl9UTZiatiCQtZcXaG7r2YLja1387wute0+\n7fA69DLwQd7WoNPT+CIY1xcvn6CuSnD21pTbeunvOH0og8q/bOQpbKrcHXIRAgMB\nAAGjZTBjMBYGA1UdEQQPMA2CC2hlYWx0aHkubGFiMAkGA1UdEwQCMAAwHQYDVR0O\nBBYEFAiT7fybD6Hsm88PXsUNbJVp7cKpMB8GA1UdIwQYMBaAFHYmU+dMJmQW0ayg\nKtTfB6VpuAjKMA0GCSqGSIb3DQEBCwUAA4IBAQBExjtrkglnJaps54DdG2RcpRFG\nvZ8ILnP0oR9ROzelAHYVcqUlZK8V7HXS49lNdGlkJ4/mgoyuUn07e28z7U01kMof\np5Wmr+pOiit/dRrDdscu543N785ewRb8wWdGvFnlcG+kKLShtBcLSbF/9kIC08Dn\n0QslHmf8MMKiAaP7Ib0TwUlJmPDVrikXrTfeLKDMWxsv5/gxe/T4q3bjWr19gDYo\nI4f8Hg8mDcm6QMuxXVPCPkhuxTAToAf0XXQed0RRiMebel1v5PeBjUP0O9hT2El4\n/sBpfLp0TH67Z/l73tSShWkbmoOHprKW2mqr7JOzCcs0LfBcJkPbNWgc3ExF\n-----END CERTIFICATE-----\n---\nServer certificate\nsubject=O = NetTriage Lab, CN = healthy.lab\nissuer=O = NetTriage Lab, CN = NetTriage Lab Root CA\n---\nNo client certificate CA names sent\nPeer signing digest: SHA256\nPeer signature type: RSA-PSS\nServer Temp Key: X25519, 253 bits\n---\nSSL handshake has read 1417 bytes and written 393 bytes\nVerification: OK\nVerified peername: healthy.lab\n---\nNew, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384\nServer public key is 2048 bit\nSecure Renegotiation IS NOT supported\nCompression: NONE\nExpansion: NONE\nNo ALPN negotiated\nEarly data was not sent\nVerify return code: 0 (ok)\n---\ndepth=1 O = NetTriage Lab, CN = NetTriage Lab Root CA\nverify return:1\ndepth=0 O = NetTriage Lab, CN = healthy.lab\nverify return:1\nDONE\n",
+          "duration_ms": 30,
+          "timed_out": false
+        },
+        {
+          "command": "openssl x509 -noout -subject -issuer -startdate -enddate -serial -fingerprint -sha256",
+          "exit_code": 0,
+          "output": "subject=O = NetTriage Lab, CN = healthy.lab\nissuer=O = NetTriage Lab, CN = NetTriage Lab Root CA\nnotBefore=Nov 11 08:11:31 2026 GMT\nnotAfter=Jan 10 08:11:31 2027 GMT\nserial=5DC1B878A18577421885F63D3B7BA4BF7A0EFB48\nsha256 Fingerprint=DB:02:E9:07:66:74:D0:64:E4:98:8D:54:02:5D:D3:0D:45:57:62:93:81:14:AE:B2:DF:A8:4C:3B:E2:13:51:F5\n",
+          "duration_ms": 14,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 70
+    },
+    {
+      "id": "http",
+      "title": "HTTP response",
+      "status": "ok",
+      "summary": "HTTP 200 OK, first byte in 3 ms over HTTP/1.0.",
+      "details": {
+        "url": "https://healthy.lab/",
+        "status_code": 200,
+        "reason": "OK",
+        "http_version": "1.0",
+        "server": "nettriage-lab Python/3.12.16",
+        "content_type": "text/html",
+        "hsts": false,
+        "redirects": [],
+        "final_url": "https://healthy.lab/",
+        "bytes": 44,
+        "timing_ms": {
+          "connect": 0.1,
+          "tls": 1.8,
+          "first_byte": 3.0,
+          "total": 3.1
+        },
+        "curl_exit": null,
+        "curl_error": "",
+        "error_kind": null
+      },
+      "commands": [
+        {
+          "command": "curl -sS -k -o /dev/null -D - --connect-timeout 5 --max-time 15 -L --max-redirs 5 -A nettriage/1.0 -w '\n__NETTRIAGE__%{http_code}|%{time_namelookup}|%{time_connect}|%{time_appconnect}|%{time_starttransfer}|%{time_total}|%{size_download}|%{num_redirects}|%{http_version}|%{url_effective}' --resolve healthy.lab:443:10.77.0.20 https://healthy.lab/",
+          "exit_code": 0,
+          "output": "HTTP/1.0 200 OK\nServer: nettriage-lab Python/3.12.16\nDate: Wed, 11 Nov 2026 08:38:18 GMT\nContent-Type: text/html\nContent-Length: 44\n\n\n__NETTRIAGE__200|0.000017|0.000116|0.001803|0.003016|0.003065|44|0|1|https://healthy.lab/",
+          "duration_ms": 7,
+          "timed_out": false
+        }
+      ],
+      "duration_ms": 7
+    }
+  ],
+  "environment": {
+    "version": "1.0.0",
+    "platform": "Linux 6.12.76-linuxkit (aarch64)",
+    "tools": {
+      "dig": true,
+      "ping": true,
+      "traceroute": true,
+      "mtr": true,
+      "nmap": true,
+      "openssl": true,
+      "curl": true,
+      "tcpdump": true
+    }
+  }
+}

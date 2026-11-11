@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Runtime data (reports saved by the API)
+backend/data/
+
+# Tooling
+.hallmark/
+.DS_Store
+
+# Test coverage database (contains absolute local paths)
+.coverage
+coverage.xml
+htmlcov/
